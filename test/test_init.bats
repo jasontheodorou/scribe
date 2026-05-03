@@ -67,3 +67,15 @@ teardown() {
   "$SCRIBE_BIN" init
   grep -q "user-edited content" "$PROJECT_DIR/journal/lessons.md"
 }
+
+@test "scribe init handles .gitignore without trailing newline" {
+  printf "*.swp" > "$PROJECT_DIR/.gitignore"  # No trailing newline
+  run "$SCRIBE_BIN" init
+  [ "$status" -eq 0 ]
+  grep -qx "journal/" "$PROJECT_DIR/.gitignore"
+  grep -qx "\\*\\.swp" "$PROJECT_DIR/.gitignore"
+  # And rerun should still be idempotent
+  "$SCRIBE_BIN" init
+  count=$(grep -c "^journal/$" "$PROJECT_DIR/.gitignore")
+  [ "$count" -eq 1 ]
+}

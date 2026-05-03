@@ -75,8 +75,12 @@ cmd_init() {
     [ -f "journal/$sub/.keep" ] || touch "journal/$sub/.keep"
   done
 
-  # 2. Add journal/ to .gitignore (idempotent).
+  # 2. Add journal/ to .gitignore (idempotent, newline-safe).
   if [ ! -f .gitignore ] || ! grep -qx "journal/" .gitignore; then
+    # Ensure existing .gitignore ends with a newline so we don't merge lines.
+    if [ -f .gitignore ] && [ -s .gitignore ] && [ -n "$(tail -c1 .gitignore)" ]; then
+      echo "" >> .gitignore
+    fi
     echo "journal/" >> .gitignore
   fi
 
