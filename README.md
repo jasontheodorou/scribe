@@ -1,6 +1,6 @@
 # Terminal Scribe
 
-[https://github.com/jasontheodorou/scribe/blob/main/scribe_logo_001.png]
+![scribe](https://github.com/jasontheodorou/scribe/blob/main/scribe_logo_001.png)
 
 **A quiet co-author that keeps a record of your project as it unfolds.**
 
