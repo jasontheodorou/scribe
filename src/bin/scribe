@@ -367,6 +367,58 @@ EOF
   echo "  library: $lib_out"
 }
 
+cmd_link() {
+  local name="${1:-}"
+  if [ -z "$name" ]; then
+    echo "Usage: scribe link <project-name>" >&2; return 2
+  fi
+  local safe; safe="$(__sanitize "$name")"
+  local archive="$HOME/.scribe/library/${safe}_archive.md"
+  if [ ! -f "$archive" ]; then
+    echo "scribe: '$name' not found in library at $archive" >&2; return 1
+  fi
+  if [ ! -d journal ]; then
+    echo "scribe: journal/ does not exist; run 'scribe init' first" >&2; return 1
+  fi
+  local imports="journal/.imports.txt"
+  if [ ! -f "$imports" ] || ! grep -qx "$safe" "$imports"; then
+    echo "$safe" >> "$imports"
+  fi
+  echo "Linked $safe — its summary + lessons will load on next session."
+}
+
+cmd_unlink() {
+  local name="${1:-}"
+  if [ -z "$name" ]; then
+    echo "Usage: scribe unlink <project-name>" >&2; return 2
+  fi
+  local safe; safe="$(__sanitize "$name")"
+  local imports="journal/.imports.txt"
+  if [ -f "$imports" ]; then
+    grep -vx "$safe" "$imports" > "$imports.tmp" || true
+    mv "$imports.tmp" "$imports"
+    [ -s "$imports" ] || rm -f "$imports"
+  fi
+  echo "Unlinked $safe."
+}
+
+cmd_library() {
+  local libdir="$HOME/.scribe/library"
+  if [ ! -d "$libdir" ] || [ -z "$(ls -A "$libdir" 2>/dev/null)" ]; then
+    echo "no archived projects yet"
+    return 0
+  fi
+  echo "Archived projects:"
+  local f
+  for f in "$libdir"/*_archive.md; do
+    [ -f "$f" ] || continue
+    local name; name=$(basename "$f" _archive.md)
+    local archived
+    archived=$(awk -F': ' '/^archived:/{print $2; exit}' "$f")
+    echo "  $name (archived $archived)"
+  done
+}
+
 main() {
   if [ $# -eq 0 ]; then
     usage
@@ -387,7 +439,10 @@ main() {
     __desktop_path) __desktop_path "$@" ;;
     __sanitize) __sanitize "$@" ;;
     archive) cmd_archive "$@" ;;
-    link|unlink|library|doctor|uninstall)
+    link)    cmd_link "$@" ;;
+    unlink)  cmd_unlink "$@" ;;
+    library) cmd_library "$@" ;;
+    doctor|uninstall)
       # Stub for now — implemented in subsequent tasks.
       echo "scribe $cmd: not implemented yet" >&2
       exit 99
