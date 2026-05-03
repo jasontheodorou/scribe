@@ -204,6 +204,40 @@ cmd_version() {
   fi
 }
 
+__desktop_path() {
+  # WSL detection
+  if [ -f /proc/version ] && grep -qi microsoft /proc/version 2>/dev/null; then
+    if command -v wslvar >/dev/null 2>&1 && command -v wslpath >/dev/null 2>&1; then
+      local winprof
+      winprof="$(wslvar USERPROFILE 2>/dev/null || true)"
+      if [ -n "$winprof" ]; then
+        wslpath "$winprof\\Desktop" 2>/dev/null && return 0
+      fi
+    fi
+    if [ -d "/mnt/c/Users/$USER/Desktop" ]; then
+      echo "/mnt/c/Users/$USER/Desktop"
+      return 0
+    fi
+  fi
+
+  if command -v xdg-user-dir >/dev/null 2>&1; then
+    local xdg
+    xdg="$(xdg-user-dir DESKTOP 2>/dev/null || true)"
+    if [ -n "$xdg" ] && [ -d "$xdg" ]; then
+      echo "$xdg"
+      return 0
+    fi
+  fi
+
+  if [ -d "$HOME/Desktop" ]; then
+    echo "$HOME/Desktop"
+    return 0
+  fi
+
+  echo "$HOME"
+  echo "scribe: warning — couldn't find Desktop, falling back to home directory" >&2
+}
+
 main() {
   if [ $# -eq 0 ]; then
     usage
@@ -221,6 +255,7 @@ main() {
     resume) cmd_resume "$@" ;;
     status) cmd_status "$@" ;;
     off) cmd_off "$@" ;;
+    __desktop_path) __desktop_path "$@" ;;
     archive|link|unlink|library|doctor|uninstall)
       # Stub for now — implemented in subsequent tasks.
       echo "scribe $cmd: not implemented yet" >&2
