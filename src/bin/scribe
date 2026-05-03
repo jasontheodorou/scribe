@@ -98,6 +98,60 @@ cmd_init() {
   echo "scribe initialized for $(pwd)"
 }
 
+cmd_pause() {
+  if [ ! -d journal ]; then
+    echo "scribe: journal/ does not exist; run 'scribe init' first" >&2
+    return 1
+  fi
+  : > "journal/.paused"
+  echo "scribe paused"
+}
+
+cmd_resume() {
+  if [ -f "journal/.paused" ]; then
+    rm -f "journal/.paused"
+  fi
+  echo "scribe resumed"
+}
+
+cmd_status() {
+  if [ -f ".scribe-declined" ]; then
+    echo "scribe is declined for this project"
+    return 0
+  fi
+  if [ ! -d journal ]; then
+    echo "scribe is not enabled for this project"
+    return 0
+  fi
+  if [ -f journal/.paused ]; then
+    echo "scribe is paused"
+  else
+    echo "scribe is active"
+  fi
+
+  # Counts
+  local logs=0 decisions=0 experiments=0
+  if [ -d journal/logbook ]; then
+    logs=$(ls -1 journal/logbook/*.md 2>/dev/null | wc -l | tr -d ' ')
+  fi
+  if [ -d journal/decisions ]; then
+    decisions=$(ls -1 journal/decisions/*.md 2>/dev/null | wc -l | tr -d ' ')
+  fi
+  if [ -d journal/experiments ]; then
+    experiments=$(ls -1 journal/experiments/*.md 2>/dev/null | wc -l | tr -d ' ')
+  fi
+  echo "  logbook entries: $logs"
+  echo "  decisions: $decisions"
+  echo "  experiments: $experiments"
+
+  # Most recent logbook
+  local latest
+  latest=$(ls -1t journal/logbook/*.md 2>/dev/null | head -1)
+  if [ -n "$latest" ]; then
+    echo "  last entry: $(basename "$latest" .md)"
+  fi
+}
+
 cmd_version() {
   if [ -f "$SCRIBE_HOME/VERSION" ]; then
     cat "$SCRIBE_HOME/VERSION"
@@ -121,7 +175,10 @@ main() {
     version|-v|--version) cmd_version "$@" ;;
     help|-h|--help)       usage ;;
     init) cmd_init "$@" ;;
-    off|pause|resume|status|archive|link|unlink|library|doctor|uninstall)
+    pause)  cmd_pause "$@" ;;
+    resume) cmd_resume "$@" ;;
+    status) cmd_status "$@" ;;
+    off|archive|link|unlink|library|doctor|uninstall)
       # Stub for now — implemented in subsequent tasks.
       echo "scribe $cmd: not implemented yet" >&2
       exit 99
