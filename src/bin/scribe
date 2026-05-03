@@ -238,6 +238,12 @@ __desktop_path() {
   echo "scribe: warning — couldn't find Desktop, falling back to home directory" >&2
 }
 
+__sanitize() {
+  local input="${1:-}"
+  # Replace any char not in [A-Za-z0-9._-] with _, then collapse runs of _.
+  echo "$input" | sed 's/[^A-Za-z0-9._-]/_/g; s/__*/_/g; s/^_//; s/_$//'
+}
+
 main() {
   if [ $# -eq 0 ]; then
     usage
@@ -256,6 +262,7 @@ main() {
     status) cmd_status "$@" ;;
     off) cmd_off "$@" ;;
     __desktop_path) __desktop_path "$@" ;;
+    __sanitize) __sanitize "$@" ;;
     archive|link|unlink|library|doctor|uninstall)
       # Stub for now — implemented in subsequent tasks.
       echo "scribe $cmd: not implemented yet" >&2
