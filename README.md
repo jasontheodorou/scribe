@@ -1,5 +1,7 @@
 # Terminal Scribe
 
+[https://github.com/jasontheodorou/scribe/blob/main/scribe_logo_001.png]
+
 **A quiet co-author that keeps a record of your project as it unfolds.**
 
 When you work with Claude in the terminal, you're making decisions, trying things, changing your mind, learning lessons. Most of that disappears the moment a session ends. Terminal Scribe writes it all down for you — in plain English, automatically — so it's there whenever you need it.
