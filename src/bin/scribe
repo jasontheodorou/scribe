@@ -1,0 +1,71 @@
+#!/bin/bash
+# scribe — auto-journal helper for Claude Code.
+# Run by Claude on the user's behalf via the project's CLAUDE.md instruction
+# block. Designed for bash 3.2+ (macOS-compatible).
+
+set -u
+
+SCRIBE_VERSION="0.1.0"
+
+# SCRIBE_HOME is normally ~/.scribe (after install). Source-tree tests override
+# it via SCRIBE_REPO and SCRIBE_TEMPLATES_DIR.
+SCRIBE_HOME="${SCRIBE_HOME:-$HOME/.scribe}"
+
+usage() {
+  cat <<EOF
+Usage: scribe <command> [options]
+
+Commands:
+  scribe init [--decline]   Enable scribe in the current project (or decline once).
+  scribe off                Disable scribe in the current project (with confirmation).
+  scribe pause              Pause journaling for the current project.
+  scribe resume             Resume journaling.
+  scribe status             Report active/paused/declined state and entry counts.
+  scribe archive            Produce a single-file project archive on the user's desktop.
+  scribe link <name>        Bring a past project's summary + lessons into this project.
+  scribe unlink <name>      Remove a previously linked project.
+  scribe library            List archived past projects.
+  scribe doctor             Verify the install is healthy.
+  scribe version            Print scribe version.
+  scribe uninstall          Run the local uninstaller (~/.scribe/uninstall.sh).
+
+Most commands are invoked by Claude on the user's behalf, not typed by hand.
+EOF
+}
+
+cmd_version() {
+  if [ -f "$SCRIBE_HOME/VERSION" ]; then
+    cat "$SCRIBE_HOME/VERSION"
+  elif [ -n "${SCRIBE_REPO:-}" ] && [ -f "$SCRIBE_REPO/VERSION" ]; then
+    cat "$SCRIBE_REPO/VERSION"
+  else
+    echo "$SCRIBE_VERSION"
+  fi
+}
+
+main() {
+  if [ $# -eq 0 ]; then
+    usage
+    exit 1
+  fi
+
+  local cmd="$1"
+  shift
+
+  case "$cmd" in
+    version|-v|--version) cmd_version "$@" ;;
+    help|-h|--help)       usage ;;
+    init|off|pause|resume|status|archive|link|unlink|library|doctor|uninstall)
+      # Stub for now — implemented in subsequent tasks.
+      echo "scribe $cmd: not implemented yet" >&2
+      exit 99
+      ;;
+    *)
+      echo "scribe: unknown command '$cmd'" >&2
+      echo "Run 'scribe help' for usage." >&2
+      exit 2
+      ;;
+  esac
+}
+
+main "$@"
