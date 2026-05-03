@@ -244,6 +244,129 @@ __sanitize() {
   echo "$input" | sed 's/[^A-Za-z0-9._-]/_/g; s/__*/_/g; s/^_//; s/_$//'
 }
 
+cmd_archive() {
+  if [ ! -d journal ] || [ -z "$(ls -A journal 2>/dev/null)" ]; then
+    echo "scribe: nothing to archive (journal/ is empty or missing)" >&2
+    return 1
+  fi
+
+  local proj_name proj_safe
+  proj_name="$(basename "$(pwd)")"
+  proj_safe="$(__sanitize "$proj_name")"
+  local today; today="$(date '+%Y-%m-%d')"
+
+  local desktop; desktop="$(__desktop_path 2>/dev/null)"
+  local library="$HOME/.scribe/library"
+  mkdir -p "$library" "$desktop"
+
+  local out="$desktop/${proj_safe}_archive.md"
+  local lib_out="$library/${proj_safe}_archive.md"
+  local tmp; tmp="$(mktemp)"
+
+  # 1. Generate the Summary section via sub-Claude.
+  local summary_path; summary_path="$(mktemp)"
+  local prompt
+  prompt=$(cat <<EOF
+You are summarizing the project "$proj_name" for an archive document. Read the journal at $(pwd)/journal/, then write a single ~300-word plain-prose summary covering:
+- What the project was and who it was for.
+- The key decisions made and why.
+- The most important lessons learned.
+- The final state of the project.
+
+Write the summary to $summary_path. No bullets, no headers. Just prose. Do not ask questions. Do not explain what you did.
+EOF
+)
+
+  if command -v claude >/dev/null 2>&1; then
+    SCRIBE_FAKE_SUMMARY_PATH="$summary_path" \
+    CLAUDE_JOURNAL_HOOK=1 \
+    claude -p --permission-mode bypassPermissions <<<"$prompt" >/dev/null 2>&1 || true
+  fi
+
+  # If sub-Claude failed/missing, write a placeholder summary.
+  if [ ! -s "$summary_path" ]; then
+    echo "(Auto-summary unavailable. Read the rest of this archive for details.)" > "$summary_path"
+  fi
+
+  # 2. Build the archive.
+  local sessions
+  sessions=$(ls -1 journal/logbook/*.md 2>/dev/null | wc -l | tr -d ' ')
+
+  {
+    echo "---"
+    echo "project: $proj_name"
+    echo "archived: $today"
+    echo "sessions: $sessions"
+    echo "---"
+    echo
+    echo "# $proj_name"
+    echo
+    echo "## Summary"
+    echo
+    cat "$summary_path"
+    echo
+
+    echo "## Lessons learned"
+    echo
+    if [ -f journal/lessons.md ]; then
+      # Skip frontmatter
+      awk 'BEGIN{fm=0} /^---$/{fm++; next} fm>=2{print}' journal/lessons.md
+    fi
+    echo
+
+    if ls journal/decisions/*.md >/dev/null 2>&1; then
+      echo "## Decisions"
+      echo
+      local d
+      for d in $(ls journal/decisions/*.md 2>/dev/null | sort); do
+        # Strip frontmatter, then de-elevate the H1 to H3.
+        awk 'BEGIN{fm=0} /^---$/{fm++; next} fm>=2{print}' "$d" | \
+          sed '0,/^# /s/^# /### /'
+        echo
+      done
+    fi
+
+    if ls journal/experiments/*.md >/dev/null 2>&1; then
+      echo "## Experiments"
+      echo
+      local e
+      for e in $(ls journal/experiments/*.md 2>/dev/null | sort); do
+        awk 'BEGIN{fm=0} /^---$/{fm++; next} fm>=2{print}' "$e" | \
+          sed '0,/^# /s/^# /### /'
+        echo
+      done
+    fi
+
+    if [ -f journal/glossary.md ]; then
+      echo "## Glossary"
+      echo
+      awk 'BEGIN{fm=0} /^---$/{fm++; next} fm>=2{print}' journal/glossary.md
+      echo
+    fi
+
+    if ls journal/logbook/*.md >/dev/null 2>&1; then
+      echo "## Recent activity"
+      echo
+      local l
+      for l in $(ls -1t journal/logbook/*.md 2>/dev/null | head -10 | tr '\n' ' '); do
+        awk 'BEGIN{fm=0} /^---$/{fm++; next} fm>=2{print}' "$l" | \
+          sed '0,/^# /s/^# /### /'
+        echo
+      done
+    fi
+  } > "$tmp"
+
+  # 3. Write to both locations atomically.
+  mv "$tmp" "$out"
+  cp "$out" "$lib_out"
+
+  rm -f "$summary_path"
+
+  echo "Saved to your desktop as ${proj_safe}_archive.md"
+  echo "  desktop: $out"
+  echo "  library: $lib_out"
+}
+
 main() {
   if [ $# -eq 0 ]; then
     usage
@@ -263,7 +386,8 @@ main() {
     off) cmd_off "$@" ;;
     __desktop_path) __desktop_path "$@" ;;
     __sanitize) __sanitize "$@" ;;
-    archive|link|unlink|library|doctor|uninstall)
+    archive) cmd_archive "$@" ;;
+    link|unlink|library|doctor|uninstall)
       # Stub for now — implemented in subsequent tasks.
       echo "scribe $cmd: not implemented yet" >&2
       exit 99
