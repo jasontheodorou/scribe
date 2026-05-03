@@ -1,6 +1,6 @@
 # Terminal Scribe
 
-![scribe](https://github.com/jasontheodorou/scribe/blob/main/scribe_logo_001.png)
+![scribe](https://github.com/jasontheodorou/terminal-scribe/blob/main/scribe_logo_001.png)
 
 **A quiet co-author that keeps a record of your project as it unfolds.**
 
@@ -26,7 +26,7 @@ Once installed, every Claude Code session quietly contributes to a journal folde
 
 ## Install
 
-1. Go to the [latest release](https://github.com/jasontheodorou/scribe/releases/latest) and download the file called **`scribe-installer.sh`**.
+1. Go to the [latest release](https://github.com/jasontheodorou/terminal-scribe/releases/latest) and download the file called **`scribe-installer.sh`**.
 2. Open Terminal and paste this in:
 
    ```
