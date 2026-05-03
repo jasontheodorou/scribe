@@ -419,6 +419,56 @@ cmd_library() {
   done
 }
 
+cmd_doctor() {
+  local issues=0
+  echo "scribe doctor:"
+
+  if [ -d "$HOME/.scribe" ]; then
+    echo "  ✓ ~/.scribe exists"
+  else
+    echo "  ✗ ~/.scribe missing — scribe is not installed"
+    issues=$((issues+1))
+  fi
+
+  if [ -f "$HOME/.scribe/hooks/session-start.sh" ] && [ -f "$HOME/.scribe/hooks/stop.sh" ]; then
+    echo "  ✓ hook scripts present"
+  else
+    echo "  ✗ hook scripts not found at ~/.scribe/hooks/"
+    issues=$((issues+1))
+  fi
+
+  if [ -f "$HOME/.claude/settings.json" ]; then
+    echo "  ✓ ~/.claude/settings.json exists"
+  else
+    echo "  ✗ ~/.claude/settings.json missing"
+    issues=$((issues+1))
+  fi
+
+  if command -v claude >/dev/null 2>&1; then
+    echo "  ✓ claude CLI on PATH"
+  else
+    echo "  ✗ claude CLI not on PATH (install Claude Code)"
+    issues=$((issues+1))
+  fi
+
+  if [ -x "$HOME/.scribe/bin/jq" ] || command -v jq >/dev/null 2>&1; then
+    echo "  ✓ jq available"
+  else
+    echo "  ✗ jq not available (re-run installer)"
+    issues=$((issues+1))
+  fi
+
+  if [ $issues -eq 0 ]; then
+    echo
+    echo "All checks OK. scribe install is healthy."
+    return 0
+  else
+    echo
+    echo "$issues issue(s) found."
+    return 1
+  fi
+}
+
 main() {
   if [ $# -eq 0 ]; then
     usage
@@ -442,7 +492,8 @@ main() {
     link)    cmd_link "$@" ;;
     unlink)  cmd_unlink "$@" ;;
     library) cmd_library "$@" ;;
-    doctor|uninstall)
+    doctor)  cmd_doctor "$@" ;;
+    uninstall)
       # Stub for now — implemented in subsequent tasks.
       echo "scribe $cmd: not implemented yet" >&2
       exit 99
