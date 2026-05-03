@@ -152,6 +152,48 @@ cmd_status() {
   fi
 }
 
+cmd_off() {
+  local yes=0
+  if [ "${1:-}" = "--yes" ]; then yes=1; fi
+
+  if [ $yes -eq 0 ]; then
+    printf "Remove scribe from this project? (y/N) "
+    read -r reply
+    case "$reply" in
+      y|Y|yes|YES) ;;
+      *) echo "aborted"; return 1 ;;
+    esac
+  fi
+
+  # 1. Remove journal/
+  rm -rf journal
+
+  # 2. Remove .scribe-declined
+  rm -f .scribe-declined
+
+  # 3. Strip the scribe block from CLAUDE.md (preserve other content).
+  if [ -f CLAUDE.md ]; then
+    awk '
+      /<!-- scribe-block-begin -->/ { in_block = 1; next }
+      /<!-- scribe-block-end -->/   { in_block = 0; next }
+      !in_block { print }
+    ' CLAUDE.md > CLAUDE.md.tmp && mv CLAUDE.md.tmp CLAUDE.md
+    # Trim trailing blank lines.
+    awk 'NR==FNR{if(NF)last=NR; next} FNR<=last' CLAUDE.md CLAUDE.md > CLAUDE.md.tmp && mv CLAUDE.md.tmp CLAUDE.md
+    # Remove file entirely if empty.
+    if [ ! -s CLAUDE.md ]; then rm -f CLAUDE.md; fi
+  fi
+
+  # 4. Remove journal/ line from .gitignore (if present).
+  if [ -f .gitignore ]; then
+    grep -v "^journal/$" .gitignore > .gitignore.tmp || true
+    mv .gitignore.tmp .gitignore
+    [ -s .gitignore ] || rm -f .gitignore
+  fi
+
+  echo "scribe removed from $(pwd)"
+}
+
 cmd_version() {
   if [ -f "$SCRIBE_HOME/VERSION" ]; then
     cat "$SCRIBE_HOME/VERSION"
@@ -178,7 +220,8 @@ main() {
     pause)  cmd_pause "$@" ;;
     resume) cmd_resume "$@" ;;
     status) cmd_status "$@" ;;
-    off|archive|link|unlink|library|doctor|uninstall)
+    off) cmd_off "$@" ;;
+    archive|link|unlink|library|doctor|uninstall)
       # Stub for now — implemented in subsequent tasks.
       echo "scribe $cmd: not implemented yet" >&2
       exit 99
