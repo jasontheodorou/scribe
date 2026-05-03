@@ -76,4 +76,4 @@ Terminal Scribe is built to match the way design work actually unfolds — messy
 
 ---
 
-If you're curious about the technical design, the full architecture is documented at [`docs/superpowers/specs/2026-05-03-scribe-design.md`](docs/superpowers/specs/2026-05-03-scribe-design.md). Otherwise, you don't need to read it. Terminal Scribe is built to stay out of your way.
+Terminal Scribe is built to stay out of your way.
