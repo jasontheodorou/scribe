@@ -33,6 +33,67 @@ Most commands are invoked by Claude on the user's behalf, not typed by hand.
 EOF
 }
 
+# Resolve where templates live. Installed: $SCRIBE_HOME/templates/. Source-tree tests:
+# $SCRIBE_TEMPLATES_DIR points at src/templates/.
+templates_dir() {
+  if [ -n "${SCRIBE_TEMPLATES_DIR:-}" ] && [ -d "$SCRIBE_TEMPLATES_DIR" ]; then
+    echo "$SCRIBE_TEMPLATES_DIR"
+  else
+    echo "$SCRIBE_HOME/templates"
+  fi
+}
+
+cmd_init() {
+  if [ "${1:-}" = "--decline" ]; then
+    : > ".scribe-declined"
+    echo "scribe declined for $(pwd)"
+    return 0
+  fi
+
+  local tdir
+  tdir="$(templates_dir)"
+  if [ ! -d "$tdir/journal-seed" ]; then
+    echo "scribe: templates not found at $tdir" >&2
+    return 1
+  fi
+
+  # 1. Create journal/ with seeds, never overwriting user content.
+  mkdir -p journal/logbook journal/decisions journal/experiments
+
+  # Copy seeds without overwriting existing files.
+  local seed
+  for seed in lessons.md README.md; do
+    if [ ! -f "journal/$seed" ]; then
+      # Substitute date placeholder in lessons.md.
+      sed "s/PLACEHOLDER/$(date '+%Y-%m-%d')/g" "$tdir/journal-seed/$seed" > "journal/$seed"
+    fi
+  done
+
+  # Empty placeholder files in subdirs.
+  local sub
+  for sub in logbook decisions experiments; do
+    [ -f "journal/$sub/.keep" ] || touch "journal/$sub/.keep"
+  done
+
+  # 2. Add journal/ to .gitignore (idempotent).
+  if [ ! -f .gitignore ] || ! grep -qx "journal/" .gitignore; then
+    echo "journal/" >> .gitignore
+  fi
+
+  # 3. Inject CLAUDE.md block (idempotent).
+  local block_file="$tdir/CLAUDE-block.md"
+  if [ -f CLAUDE.md ]; then
+    if ! grep -q "scribe-block-begin" CLAUDE.md; then
+      echo "" >> CLAUDE.md
+      cat "$block_file" >> CLAUDE.md
+    fi
+  else
+    cat "$block_file" > CLAUDE.md
+  fi
+
+  echo "scribe initialized for $(pwd)"
+}
+
 cmd_version() {
   if [ -f "$SCRIBE_HOME/VERSION" ]; then
     cat "$SCRIBE_HOME/VERSION"
@@ -55,7 +116,8 @@ main() {
   case "$cmd" in
     version|-v|--version) cmd_version "$@" ;;
     help|-h|--help)       usage ;;
-    init|off|pause|resume|status|archive|link|unlink|library|doctor|uninstall)
+    init) cmd_init "$@" ;;
+    off|pause|resume|status|archive|link|unlink|library|doctor|uninstall)
       # Stub for now — implemented in subsequent tasks.
       echo "scribe $cmd: not implemented yet" >&2
       exit 99
