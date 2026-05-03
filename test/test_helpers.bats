@@ -34,3 +34,9 @@ teardown() {
   [ -s "$TEST_HOME/claude.calls" ]
   [ -s "$TEST_HOME/claude.stdin" ]
 }
+
+@test "helpers: install_fake_xdg returns the argument it was called with" {
+  install_fake_xdg
+  result="$(xdg-user-dir DESKTOP)"
+  [ "$result" = "DESKTOP" ]
+}

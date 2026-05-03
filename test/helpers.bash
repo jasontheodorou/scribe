@@ -57,7 +57,7 @@ FAKE
 install_fake_xdg() {
   local fakedir="$TEST_HOME/fakebin"
   mkdir -p "$fakedir"
-  cat >"$fakedir/xdg-user-dir" <<FAKE
+  cat >"$fakedir/xdg-user-dir" <<'FAKE'
 #!/bin/bash
 echo "$1"
 FAKE
