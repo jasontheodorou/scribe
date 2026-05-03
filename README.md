@@ -1,54 +1,77 @@
-# scribe
+# Terminal Scribe
 
-Always-on auto-journaling for Claude Code. Per-project consent. Single-file install. No CLI knowledge required.
+**A quiet co-author that keeps a record of your project as it unfolds.**
 
-## What it does
+When you work with Claude in the terminal, you're making decisions, trying things, changing your mind, learning lessons. Most of that disappears the moment a session ends. Terminal Scribe writes it all down for you — in plain English, automatically — so it's there whenever you need it.
 
-scribe makes Claude write a plain-English design history of your project as you work — decisions, lessons, experiments, and a daily log of every session. You talk to Claude in plain English; scribe handles the rest.
+## Why you'd want this
 
-- **Always on.** Once enabled in a project, every Claude Code session contributes to a `journal/` folder.
-- **Per-project consent.** scribe never journals a project until you say yes to it. The first time you open Claude in a new project, Claude asks once.
-- **Pause/resume in English.** Say "pause journaling" or "resume journaling". Or use the `/journal-pause` slash command.
-- **Archive at project end.** Say "archive this project" and Claude saves a single-file Markdown summary to your desktop. A copy is kept in scribe's library so future projects can recall what you learned.
-- **Cross-project recall.** Ask Claude "have we faced this before?" — scribe searches your past projects and surfaces relevant excerpts.
+**A living history of your project, with no effort.** Every Claude Code session leaves behind a journal entry: what you talked about, what you decided, what you tried. You don't have to remember to take notes. You don't have to summarise anything. It just happens.
+
+**Continuity across sessions.** Pick up a project a week later and Claude already knows where you left off — because the journal is read at the start of every session. No more "remind me where we got to?" No more pasting in old screenshots or chat logs.
+
+**A clean handoff when you're done.** When a project wraps up, just say *"archive this project"* and Claude saves a single tidy document to your desktop. The project summary, the key decisions, the lessons learned — all in one place. Email it to a stakeholder, save it for your portfolio, hand it to whoever takes over.
+
+**Lessons that travel with you.** Every project you archive joins your personal library. Next time you start something new, you can ask *"have I run into this before?"* and Claude will pull the relevant wisdom from a past project. Your hard-won insights stop dying with each piece of work.
+
+**Total privacy by default.** Your journal lives on your computer, not in the cloud. It's hidden from any team git repository so it never accidentally gets shared. You stay in control of what's recorded and what isn't.
+
+**You can pause it anytime.** If you're about to discuss something sensitive, just tell Claude *"pause journaling"*. Resume when you're ready. The choice is always yours.
+
+## How it works
+
+Once installed, every Claude Code session quietly contributes to a journal folder in your project. **You don't run any commands. Claude does the writing.** You can pause it, resume it, look things up in it, or turn it off any time — just by talking to Claude in plain English.
 
 ## Install
 
-1. Download `scribe-installer.sh` from the [latest release](https://github.com/<org>/scribe/releases/latest) using your browser.
-2. Open Terminal and run:
+1. Go to the [latest release](https://github.com/jasontheodorou/scribe/releases/latest) and download the file called **`scribe-installer.sh`**.
+2. Open Terminal and paste this in:
 
    ```
    bash ~/Downloads/scribe-installer.sh
    ```
 
-3. Open Claude Code in any project. Claude will ask once whether to enable journaling there. Answer yes.
+3. Open Claude Code in any project, as you normally would. Claude will ask once whether you'd like Terminal Scribe to keep a journal for that project. Say yes.
 
-That's it. No `curl | bash`, no network access required during install (everything is bundled), no system packages to install. Works in restricted corporate environments.
+That's the whole setup. You won't need to think about it again.
+
+## How to use it
+
+You don't, really — that's the point. Keep working with Claude exactly as you do now.
+
+When you want to interact with Terminal Scribe, just say so in plain English. A few things you can ask:
+
+- *"What did we decide about the navigation last week?"* — Claude reads your journal and tells you.
+- *"Summarise what we've done on this project."* — Claude writes you a recap from the journal.
+- *"Pause journaling for now."* — Claude stops writing until you say resume.
+- *"Resume journaling."* — Back on.
+- *"Archive this project."* — Claude saves a clean summary document to your desktop.
+- *"Have we faced this kind of problem before?"* — Claude looks across all your archived past projects and surfaces what's relevant.
+- *"Turn off Terminal Scribe in this project."* — Claude removes it from the current project (the rest of your projects stay as they are).
+
+No commands to memorise, no menus to navigate. Just talk.
 
 ## Uninstall
+
+If you change your mind, open Terminal and paste this:
 
 ```
 bash ~/.scribe/uninstall.sh
 ```
 
-You'll be asked whether to keep your archived past-project journals (defaults to yes).
+It'll ask whether you want to keep your library of past-project summaries (defaults to yes). Then it's gone.
 
-## Requirements
+## What you need
 
-- macOS or Linux (including WSL).
-- bash 3.2+ (built-in on macOS).
-- [Claude Code](https://claude.com/claude-code) installed and on PATH.
+- A Mac, or a Linux laptop.
+- [Claude Code](https://claude.com/claude-code) — the terminal app from Anthropic. If you don't have it yet, that link will sort you out.
 
-## How it works
+That's it. No accounts to create, no subscriptions, no API keys. Terminal Scribe runs entirely on your own machine.
 
-scribe ships as a single self-extracting installer (~7 MB) that bundles everything it needs, including platform-specific `jq` binaries. After install:
+## Made for design teams
 
-- Two hooks are wired into Claude Code's global settings: `SessionStart` (loads journal context at the start of each session) and `Stop` (a safety net that catches anything live writes missed).
-- Per-project state lives in `./journal/` (gitignored by default — private to your local checkout).
-- Cross-project archives live in `~/.scribe/library/`.
+Terminal Scribe is built to match the way design work actually unfolds — messy, iterative, full of half-formed ideas that turn out to matter later. It captures the *why* behind your decisions, not just the *what*, so the trail you leave is one you can actually follow.
 
-For the full architecture, see `docs/superpowers/specs/2026-05-03-scribe-design.md`.
+---
 
-## License
-
-MIT. Bundled `jq` is also MIT — see `src/installer/jq-binaries/LICENSE-jq`.
+If you're curious about the technical design, the full architecture is documented at [`docs/superpowers/specs/2026-05-03-scribe-design.md`](docs/superpowers/specs/2026-05-03-scribe-design.md). Otherwise, you don't need to read it. Terminal Scribe is built to stay out of your way.
