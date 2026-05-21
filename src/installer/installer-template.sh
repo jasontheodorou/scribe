@@ -182,7 +182,7 @@ cat <<'BANNER'
   |_|\___|_|  |_| |_| |_|_|_| |_|\__,_|_| |____/ \___|_|  |_|_.__/ \___|
 
 BANNER
-printf "  Hi %s. Scribe quietly records your work, so nothing gets lost.\n\n" "$WHO"
+printf "  Hi %s. Terminal Scribe quietly records your work, so nothing gets lost.\n\n" "$WHO"
 cat <<'BODY'
   As you work with Claude:
 
@@ -201,7 +201,7 @@ cat <<'BODY'
   1. Open Claude Code in any project, the way you usually would
   2. Claude will ask if you want auto-journaling. Say yes, no, or "not now"
 
-  Scribe works best when paired with Terminal Folders.
+  Terminal Scribe works best when paired with Terminal Project Folders.
   https://github.com/jasontheodorou/terminal-project-folders
 
   To remove scribe later: bash ~/.scribe/uninstall.sh
