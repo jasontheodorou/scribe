@@ -182,16 +182,15 @@ cat <<'BANNER'
   |_|\___|_|  |_| |_| |_|_|_| |_|\__,_|_| |____/ \___|_|  |_|_.__/ \___|
 
 BANNER
-printf "  Hi %s. Scribe makes a quiet record of your work, so what you\n" "$WHO"
-printf "  decide today is still findable next month.\n\n"
+printf "  Hi %s. Scribe quietly records your work, so nothing gets lost.\n\n" "$WHO"
 cat <<'BODY'
   As you work with Claude:
 
-  • the journal writes itself — decisions, lessons, experiments, all in prose
-  • lessons travel with you, because archived projects join your local library
-  • everything stays on your machine, and out of any team git repo
+  • the journal writes itself, in prose
+  • lessons travel across projects
+  • everything stays on your machine
 
-  Ask Claude in plain English:
+  Ask Claude:
 
   • "what did we decide about X"
   • "archive this project"
