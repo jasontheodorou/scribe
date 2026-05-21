@@ -26,14 +26,13 @@ Once installed, every Claude Code session quietly contributes to a journal folde
 
 ## Install
 
-1. Go to the [latest release](https://github.com/jasontheodorou/terminal-scribe/releases/latest) and download the file called **`scribe-installer.sh`**.
-2. Open Terminal and paste this in:
+Open Terminal and paste this:
 
-   ```
-   bash ~/Downloads/scribe-installer.sh
-   ```
+```bash
+curl -fsSL https://github.com/jasontheodorou/terminal-scribe/releases/latest/download/scribe-installer.sh | bash
+```
 
-3. Open Claude Code in any project, as you normally would. Claude will ask once whether you'd like Terminal Scribe to keep a journal for that project. Say yes.
+Then open Claude Code in any project, as you normally would. Claude will ask once whether you'd like Terminal Scribe to keep a journal for that project. Say yes.
 
 That's the whole setup. You won't need to think about it again.
 

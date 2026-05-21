@@ -164,20 +164,20 @@ cat <<'BANNER'
   |_|\___|_|  |_| |_| |_|_|_| |_|\__,_|_| |____/ \___|_|  |_|_.__/ \___|
 
 BANNER
-printf "  Hi %s. Scribe quietly journals your Claude Code sessions, so the\n" "$WHO"
-printf "  context of your work doesn't vanish when you close the terminal.\n\n"
+printf "  Hi %s. Scribe makes a quiet record of your work, so what you\n" "$WHO"
+printf "  decide today is still findable next month.\n\n"
 cat <<'BODY'
-  In every project you turn on:
+  As you work with Claude:
 
-  • a journal is kept under .scribe/ in the project folder
-  • the journal is gitignored, so nothing accidentally gets shared
-  • Claude reads it at the start of each session, so you don't have to recap
+  • the journal writes itself — decisions, lessons, experiments, all in prose
+  • lessons travel with you, because archived projects join your local library
+  • everything stays on your machine, and out of any team git repo
 
-  Talk to Claude in plain English:
+  Ask Claude in plain English:
 
-  • "summarise this project"
-  • "pause journaling"
+  • "what did we decide about X"
   • "archive this project"
+  • "have we faced this before"
 
   Next:
 
