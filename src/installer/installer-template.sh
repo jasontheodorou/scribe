@@ -198,9 +198,8 @@ cat <<'BODY'
 
   Next:
 
-  1. Open Claude Code in any project (cd in, run "claude")
-  2. Claude will ask once if you want to turn on auto-journaling there
-  3. Say yes to enable, "no" to skip, "not now" to be asked again later
+  1. Open Claude Code in any project, the way you usually would
+  2. Claude will ask if you want auto-journaling. Say yes, no, or "not now"
 
   To remove scribe later: bash ~/.scribe/uninstall.sh
 
