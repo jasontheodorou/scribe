@@ -201,6 +201,9 @@ cat <<'BODY'
   1. Open Claude Code in any project, the way you usually would
   2. Claude will ask if you want auto-journaling. Say yes, no, or "not now"
 
+  Scribe works best when paired with Terminal Folders.
+  https://github.com/jasontheodorou/terminal-project-folders
+
   To remove scribe later: bash ~/.scribe/uninstall.sh
 
 BODY
