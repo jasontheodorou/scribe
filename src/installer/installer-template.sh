@@ -10,6 +10,20 @@ CLAUDE_DIR="$HOME/.claude"
 SETTINGS="$CLAUDE_DIR/settings.json"
 COMMANDS_DIR="$CLAUDE_DIR/commands"
 
+# Bootstrap: when piped (curl | bash), $0 is "bash" and BASH_SOURCE[0] is
+# empty, so the payload extractor (awk '...' "$0") can't find the script.
+# Re-fetch the installer to a tempfile and re-exec from there. When run
+# from a real file (downloaded normally), this check is skipped.
+if [ -z "${BASH_SOURCE[0]:-}" ] || [ ! -f "${BASH_SOURCE[0]}" ]; then
+  TMPSCRIPT=$(mktemp -t scribe-installer.XXXXXX) || { echo "scribe: cannot create tempfile" >&2; exit 1; }
+  trap 'rm -f "$TMPSCRIPT"' EXIT
+  if ! curl -fsSL "https://github.com/jasontheodorou/terminal-scribe/releases/latest/download/scribe-installer.sh" -o "$TMPSCRIPT"; then
+    echo "scribe: failed to download installer" >&2
+    exit 1
+  fi
+  exec bash "$TMPSCRIPT" "$@"
+fi
+
 red()    { printf '\033[0;31m%s\033[0m\n' "$*"; }
 green()  { printf '\033[0;32m%s\033[0m\n' "$*"; }
 bold()   { printf '\033[1m%s\033[0m\n' "$*"; }
