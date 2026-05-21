@@ -106,9 +106,11 @@ echo "  ✓ Installed scribe to $SCRIBE_HOME"
 mkdir -p "$CLAUDE_DIR" "$COMMANDS_DIR"
 JQ="$SCRIBE_HOME/bin/jq"
 
-if [ ! -f "$SETTINGS" ] || ! "$JQ" empty "$SETTINGS" >/dev/null 2>&1; then
-  # Missing, empty, or invalid JSON — reset to a minimal object so subsequent
-  # jq operations don't silently produce empty output and clobber the file.
+if [ ! -f "$SETTINGS" ] || ! "$JQ" -e 'type == "object"' "$SETTINGS" >/dev/null 2>&1; then
+  # Missing, empty, whitespace-only, or invalid JSON — reset to a minimal
+  # object so subsequent jq operations don't silently produce empty output
+  # and clobber the file. (jq empty accepts a bare newline; use a stricter
+  # check that the parsed value is actually a JSON object.)
   echo '{}' > "$SETTINGS"
 fi
 
